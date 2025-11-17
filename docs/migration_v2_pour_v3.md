@@ -9,7 +9,7 @@
 ```bash
 # Créer les nouveaux dossiers
 mkdir -p docker monitoring/{prometheus,grafana,alertmanager}
-
+f
 # Copier les fichiers depuis ce guide
 # - docker/docker-compose.yml
 # - docker/Dockerfile.app
