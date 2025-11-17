@@ -16,7 +16,7 @@ f
 # - monitoring/prometheus/prometheus.yml
 # - etc.
 ```
-
+ 
 ### 2. Installation Dépendances (2 min)
 ```bash
 pip install -r requirements/monitoring.txt
