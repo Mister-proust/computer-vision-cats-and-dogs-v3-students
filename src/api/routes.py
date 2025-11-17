@@ -32,6 +32,7 @@ from fastapi import APIRouter, File, UploadFile, HTTPException, Depends, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
+from src.monitoring.prometheus_metrics import track_inference_time
 import sys
 from pathlib import Path
 import time

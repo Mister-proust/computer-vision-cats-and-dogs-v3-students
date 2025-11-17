@@ -24,6 +24,15 @@ from prometheus_client import Counter, Histogram, Gauge, generate_latest
 from prometheus_fastapi_instrumentator import Instrumentator
 import os
 
+# TODO: Créer métrique histogram pour latence
+inference_time_histogram = Histogram(
+    'cv_inference_time_seconds',
+    'Temps d\'inférence en secondes'
+)
+
+def track_inference_time(inference_time_ms: float):
+    """Enregistre le temps d'inférence"""
+    inference_time_histogram.observe(inference_time_ms / 1000)
 # ═══════════════════════════════════════════════════════════════════════════
 # 📊 MÉTRIQUES CUSTOM - Spécifiques au modèle CV cats/dogs
 # ═══════════════════════════════════════════════════════════════════════════
@@ -144,12 +153,3 @@ def update_db_status(is_connected: bool):
 #
 # ═══════════════════════════════════════════════════════════════════════════
 
-# TODO: Créer métrique histogram pour latence
-inference_time_histogram = Histogram(
-    'cv_inference_time_seconds',
-    'Temps d\'inférence en secondes'
-)
-
-def track_inference_time(inference_time_ms: float):
-    """Enregistre le temps d'inférence"""
-    inference_time_histogram.observe(inference_time_ms / 1000)
