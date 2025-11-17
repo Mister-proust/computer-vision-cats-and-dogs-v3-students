@@ -712,3 +712,9 @@ async def health_check(db: Session = Depends(get_db)):
 #    → Migration progressive sans breaking change
 #
 # ═══════════════════════════════════════════════════════════════════════════
+
+# TODO: Mesurer et tracker le temps d'inférence
+start_time = time.time()
+# ... code de prédiction ...
+inference_time_ms = (time.time() - start_time) * 1000
+track_inference_time(inference_time_ms)

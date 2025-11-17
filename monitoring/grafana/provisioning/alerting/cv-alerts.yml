@@ -1,169 +1,56 @@
-# ═══════════════════════════════════════════════════════════════════════════════
-# 🚨 GRAFANA ALERT RULES - Règles d'alerting MLOps
-# ═══════════════════════════════════════════════════════════════════════════════
-#
-# 🎯 OBJECTIF
-# Définit les règles d'alerte Grafana Unified Alerting pour monitoring proactif.
-# Format YAML généré par Grafana UI (export), structuré pour provisioning.
-#
-# 📚 CONCEPTS CLÉS
-# - Alert rule : condition + données + seuil + durée
-# - Query (data) : source métriques (Prometheus, SQL, etc.)
-# - Condition (threshold) : évaluation booléenne (>, <, ==)
-# - for : durée avant déclenchement (anti-faux positifs)
-# - noDataState/execErrState : comportement si données manquantes
-#
-# 🔗 WORKFLOW
-# Query Prometheus → Reduce → Threshold → Fire/Resolve → Contact Point (Discord)
-#
-# ⚠️ FORMAT COMPLEXE
-# Ce YAML est verbeux car exporté depuis Grafana UI.
-# Création manuelle difficile → privilégier création UI puis export.
-#
-# ═══════════════════════════════════════════════════════════════════════════════
-
 apiVersion: 1
 
 groups:
-  # ─────────────────────────────────────────────────────────────────────────
-  # 📁 GROUPE D'ALERTES : Computer Vision Monitoring
-  # ─────────────────────────────────────────────────────────────────────────
   - orgId: 1
-    # 🏢 Organization ID (défaut : 1)
-    
     name: cv-monitoring
-    # 🏷️ Nom du groupe (identifiant unique)
-    # Regroupe alertes liées logiquement (même système/service)
-    
     folder: Computer Vision
-    # 📂 Dossier Grafana UI (organisation visuelle)
-    # Créé automatiquement si inexistant
-    
     interval: 1m
-    # ⏱️ Fréquence d'évaluation des règles (toutes les 1 minute)
-    # Compromis : 30s = réactif mais charge CPU, 5m = économe mais lent
-    
     rules:
-      # ═══════════════════════════════════════════════════════════════════════
-      # 🔴 ALERTE 1 : Base de données déconnectée (CRITICAL)
-      # ═══════════════════════════════════════════════════════════════════════
       - uid: cv-db-disconnected
-        # 🆔 Identifiant unique de la règle (ne pas modifier après création)
-        # Utilisé par Grafana pour tracking état (firing/resolved)
-        
         title: Database Disconnected
-        # 📌 Titre affiché dans UI et notifications Discord
-        
         condition: C
-        # 🎯 Référence à la query définissant la condition de déclenchement
-        # Ici : refId "C" = threshold sur query "A"
-        
         data:
-          # ─────────────────────────────────────────────────────────────────
-          # 📊 QUERY A : Récupération métrique Prometheus
-          # ─────────────────────────────────────────────────────────────────
           - refId: A
-            # 🔤 Identifiant de query (référencé par queries suivantes)
-            
             queryType: ''
-            # Type de query (vide = standard Prometheus)
-            
             relativeTimeRange:
-              from: 600  # -10 minutes
-              to: 0      # maintenant
-            # ⏰ Fenêtre temporelle de la query (10 dernières minutes)
-            # Permet d'évaluer tendance récente, pas juste valeur instantanée
-            
+              from: 600  
+              to: 0      
             datasourceUid: prometheus
-            # 🔌 Source de données (configurée dans datasources.yml)
-            # Format : nom du datasource provisionné
-            
             model:
               editorMode: code
-              # 📝 Mode édition (code vs builder)
-              # code = PromQL brut, builder = UI graphique
-              
               expr: cv_database_connected
-              # 📊 EXPRESSION PROMQL
-              # Métrique Gauge binaire (1 = connecté, 0 = déconnecté)
-              # Mise à jour par update_db_status() dans routes.py
-              
               instant: true
-              # ⚡ Query instantanée (pas de range)
-              # true = dernière valeur uniquement
-              # false = série temporelle complète
-              
               range: false
-              # 🎯 Pas de range query (cohérent avec instant: true)
-              
               refId: A
-              # 🔤 Référence (dupliquée, requis format Grafana)
-          
-          # ─────────────────────────────────────────────────────────────────
-          # 🧮 QUERY C : Threshold (condition de déclenchement)
-          # ─────────────────────────────────────────────────────────────────
           - refId: C
             datasourceUid: __expr__
-            # 🔧 Datasource interne Grafana (expressions/transformations)
-            # __expr__ = moteur d'évaluation Grafana (pas Prometheus)
-            
             model:
               conditions:
                 - evaluator:
                     params:
                       - 1
-                    type: lt
-                  # 📐 ÉVALUATEUR : valeur < 1 ?
-                  # lt = less than
-                  # cv_database_connected < 1 → true si = 0 (déconnecté)
-                  
+                    type: lt                  
                   reducer:
-                    type: last
-                  # 📊 Réduction : prendre dernière valeur
-                  # Alternatives : avg, min, max, sum
-                  
+                    type: last                  
                   type: query
-                  # Type de condition (basé sur query)
-              
+                  
               expression: A
-              # 🎯 Évalue query A (cv_database_connected)
               
               type: threshold
-              # 🔔 Type d'expression : seuil binaire (true/false)
-        
+              
         noDataState: Alerting
-        # 🚨 Comportement si aucune donnée disponible
-        # Alerting = déclenche alerte (assume problème)
-        # Alternatives : NoData (pas d'alerte), OK (assume normal)
-        # 
-        # 💡 CHOIX ICI : Alerting
-        # Si métrique absente → app probablement crashée → alerter
-        
         execErrState: Alerting
-        # ⚠️ Comportement si erreur d'exécution query
-        # Exemple : Prometheus down, query invalide
-        # Alerting = principe de précaution (mieux notifier que manquer incident)
-        
         for: 1m
-        # ⏳ Durée avant déclenchement (condition vraie pendant 1 min)
-        # Évite faux positifs (blips réseau courts)
-        # Court (1m) car DB down = incident critique
         
         annotations:
           description: L'API ne peut plus accéder à PostgreSQL
-          # 📄 Description détaillée (affichée dans Discord embed)
           
           summary: Base de données PostgreSQL déconnectée
-          # 📋 Résumé court (titre notification)
         
         labels:
           severity: critical
-          # 🔴 Sévérité maximale
-          # Utilisé par notification policies pour routage
         
         isPaused: false
-        # ▶️ État actif (false = alertes envoyées)
-        # true = temporairement désactivé (maintenance)
 
 # ═══════════════════════════════════════════════════════════════════════════
 # 🎓 STRUCTURE ALERT RULE GRAFANA

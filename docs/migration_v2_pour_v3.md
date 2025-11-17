@@ -36,9 +36,9 @@ make docker-up
 
 # Vérifier les services
 docker ps
-curl http://localhost:8000/health
-curl http://localhost:3000  # Grafana
-curl http://localhost:9090  # Prometheus
+curl http://localhost:8007/health
+curl http://localhost:3007  # Grafana
+curl http://localhost:9097  # Prometheus
 ```
 
 ### 5. Migration Progressive
