@@ -205,12 +205,13 @@ async def update_feedback(
                     status_code=400,
                     detail="user_feedback doit être 0 ou 1"
                 )
+            record.user_feedback = user_feedback
+            
             if ENABLE_PROMETHEUS:
                 try:
                     track_feedback("positive" if user_feedback == 1 else "negative")
                 except Exception as e:
                     print(f"Soucis avec le feedback Prometheus: {e}")
-            record.user_feedback = user_feedback
         
         if user_comment:
             record.user_comment = user_comment
