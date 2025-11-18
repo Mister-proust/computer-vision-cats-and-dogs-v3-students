@@ -21,8 +21,8 @@ groups:
         annotations:
           summary: "Latence élevée détectée"
           description: "Latence moyenne > 2s pendant 2 minutes"
-      - alert: aleert_high_feeback_negative
-        expr: rate(cv_user_feedback_total{feedback="negative"}[5m]) / ignoring(feedback) group_left sum(rate(cv_user_feedback_total[5m])) > 0.5
+      - alert: alert_high_feedback_negative
+        expr: rate(cv_user_feedback_total{feedback="negative"}[10m]) / ignoring(feedback) group_left sum(rate(cv_user_feedback_total[10m])) > 0.5
         for: 10m
         labels:
           severity: warning

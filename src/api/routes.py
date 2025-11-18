@@ -30,7 +30,6 @@ alert_high_latency = None
 alert_database_disconnected = None
 notifier = None
 track_prediction = None
-track_feedback = None
 update_db_status = None
 
 if ENABLE_PROMETHEUS:
