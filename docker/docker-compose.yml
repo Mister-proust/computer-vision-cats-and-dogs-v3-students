@@ -43,7 +43,7 @@ services:
       postgres:
         condition: service_healthy
     ports:
-      - "9187:9188"
+      - "9188:9188"
   cv_app:
     build:
       context: ..
