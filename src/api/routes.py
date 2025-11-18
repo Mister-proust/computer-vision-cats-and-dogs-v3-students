@@ -118,7 +118,7 @@ async def predict_api(
         raise HTTPException(status_code=400, detail="Format d'image invalide")
         
     
-    start_time = time.perf_counter()
+    start_time = time.time()
    
     try:
         image_data = await file.read()
@@ -151,7 +151,8 @@ async def predict_api(
             "inference_time_ms": inference_time_ms,
             "feedback_id": feedback_record.id  # Pour update feedback ultérieur
         }
-        
+        inference_time_ms = (time.time() - start_time) * 1000
+        track_inference_time(inference_time_ms)
         return response_data
         
     except Exception as e:
@@ -345,6 +346,3 @@ async def health_check(db: Session = Depends(get_db)):
         }
     }
     
-start_time = time.time()
-inference_time_ms = (time.time() - start_time) * 1000
-track_inference_time(inference_time_ms)
