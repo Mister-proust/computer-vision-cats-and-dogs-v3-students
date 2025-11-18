@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 import time
 import os
-
+from src.monitoring.prometheus_metrics import track_feedback 
 ROOT_DIR = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(ROOT_DIR))
 
