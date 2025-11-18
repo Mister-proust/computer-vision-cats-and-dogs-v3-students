@@ -35,9 +35,11 @@ update_db_status = None
 if ENABLE_PROMETHEUS:
     try:
         from src.monitoring.prometheus_metrics import (
-            update_db_status as _update_db_status   # Gauge database_status
+            update_db_status as _update_db_status,
+            track_feedback as _track_feedback   # Gauge database_status
         )
         update_db_status = _update_db_status
+        track_feedback = _track_feedback
         print("✅ Prometheus tracking functions loaded")
     except ImportError as e:
         ENABLE_PROMETHEUS = False  # Désactivation silencieuse
