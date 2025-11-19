@@ -68,7 +68,7 @@ templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 router = APIRouter()
 
 if ENABLE_PROMETHEUS:
-    @router.middleware("http")
+    @app.middleware("http")
     async def prometheus_request_middleware(request: Request, call_next):
         endpoint = request.url.path
         method = request.method
