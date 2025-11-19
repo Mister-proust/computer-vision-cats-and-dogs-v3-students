@@ -37,4 +37,10 @@ feedback_counter = Counter(
 def track_feedback(feedback_type: str):
     feedback_counter.labels(feedback_type=feedback_type).inc()
 
+# Compter le nombre de requêtes par heure enregistrées par le site
+request_counter = Counter(
+    "cv_requests_hour",
+    "Nombre de requêtes reçues par l'application (par heure)",
+    ["endpoint", "method", "status"]
+)
 

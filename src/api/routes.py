@@ -7,7 +7,6 @@ import sys
 from pathlib import Path
 import time
 import os
-from src.monitoring.prometheus_metrics import track_feedback 
 ROOT_DIR = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(ROOT_DIR))
 
@@ -37,9 +36,11 @@ if ENABLE_PROMETHEUS:
         from src.monitoring.prometheus_metrics import (
             update_db_status as _update_db_status,
             track_feedback as _track_feedback   # Gauge database_status
+            request_counter as _request_counter
         )
         update_db_status = _update_db_status
         track_feedback = _track_feedback
+        request_counter = _request_counter
         print("✅ Prometheus tracking functions loaded")
     except ImportError as e:
         ENABLE_PROMETHEUS = False  # Désactivation silencieuse
@@ -65,6 +66,31 @@ TEMPLATES_DIR = ROOT_DIR / "src" / "web" / "templates"
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
 router = APIRouter()
+
+if ENABLE_PROMETHEUS:
+    @router.middleware("http")
+    async def prometheus_request_middleware(request: Request, call_next):
+        endpoint = request.url.path
+        method = request.method
+
+        try:
+            response = await call_next(request)
+            status = response.status_code
+        except Exception:
+            status = 500
+            raise
+        finally:
+            try:
+                request_counter.labels(
+                    endpoint=endpoint,
+                    method=method,
+                    status=status
+                ).inc()
+            except Exception as e:
+                print(f"[Prometheus] Erreur compteur requêtes : {e}")
+
+        return response
+
 
 predictor = CatDogPredictor()
 
@@ -111,6 +137,7 @@ async def predict_api(
     token: str = Depends(verify_token),  # 🔐 Authentification requise
     db: Session = Depends(get_db)       # 🗄️ Injection session DB
 ):
+    request_counter.inc()
     if not predictor.is_loaded():
         raise HTTPException(status_code=503, detail="Modèle non disponible")
     
