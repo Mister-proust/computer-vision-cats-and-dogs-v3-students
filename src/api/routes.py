@@ -118,7 +118,7 @@ async def predict_api(
         raise HTTPException(status_code=400, detail="Format d'image invalide")
         
     
-    start_time = time.time()
+    start_time = time.perf_counter()
    
     try:
         image_data = await file.read()
