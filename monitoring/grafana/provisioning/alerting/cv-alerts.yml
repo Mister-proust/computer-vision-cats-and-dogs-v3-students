@@ -1,6 +1,163 @@
 apiVersion: 1
 groups:
     - orgId: 1
+      name: Prediction_outrange
+      folder: Computer Vision
+      interval: 1m
+      rules:
+        - uid: bf4lqel126adcf
+          title: Proportion prédiction chien/chat
+          condition: C
+          data:
+            - refId: A
+              relativeTimeRange:
+                from: 3600
+                to: 0
+              datasourceUid: prometheus
+              model:
+                adhocFilters: []
+                datasource:
+                    type: prometheus
+                    uid: prometheus
+                editorMode: code
+                expr: "sum(cv_predictions_total{prediction=\"Chien\"})\r\n/\r\nsum(cv_predictions_total)\r\n"
+                instant: true
+                interval: ""
+                intervalMs: 10000
+                legendFormat: __auto
+                maxDataPoints: 43200
+                range: false
+                refId: A
+            - refId: C
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 0.2
+                            - 0.8
+                        type: outside_range
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+          dashboardUid: cv-cats-dogs-workshop
+          panelId: 6
+          noDataState: NoData
+          execErrState: Error
+          for: 30m
+          annotations:
+            __dashboardUid__: cv-cats-dogs-workshop
+            __panelId__: "6"
+            summary: Attention, potentiellement un problème au niveau des prédictions, surreprésentation d'une catégorie !
+          isPaused: false
+          notification_settings:
+            receiver: Discord CV Alerts
+    - orgId: 1
+      name: Too_much_requests
+      folder: Computer Vision
+      interval: 1m
+      rules:
+        - uid: ff4lliyy8zgu8e
+          title: Moyenne de requêtes par heure
+          condition: C
+          data:
+            - refId: A
+              relativeTimeRange:
+                from: 3600
+                to: 0
+              datasourceUid: prometheus
+              model:
+                adhocFilters: []
+                datasource:
+                    type: prometheus
+                    uid: prometheus
+                editorMode: code
+                expr: increase(cv_requests_hour_total{endpoint="/api/predict"}[1h])
+                instant: false
+                interval: 1h
+                intervalMs: 10000
+                legendFormat: __auto
+                maxDataPoints: 43200
+                range: true
+                refId: A
+            - refId: B
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params: []
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - B
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                reducer: mean
+                refId: B
+                type: reduce
+            - refId: C
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 15
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: B
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+          dashboardUid: cv-cats-dogs-workshop
+          panelId: 5
+          noDataState: NoData
+          execErrState: Error
+          for: 1h
+          keepFiringFor: 1m
+          annotations:
+            __dashboardUid__: cv-cats-dogs-workshop
+            __panelId__: "5"
+            summary: Trop de requêtes ! Botting ?
+          isPaused: false
+          notification_settings:
+            receiver: Discord CV Alerts
+    - orgId: 1
       name: cv-monitoring
       folder: Computer Vision
       interval: 1m
