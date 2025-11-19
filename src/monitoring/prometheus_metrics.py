@@ -44,3 +44,12 @@ request_counter = Counter(
     ["endpoint", "method", "status"]
 )
 
+prediction_counter = Counter(
+    "cv_predictions_total",
+    "Proportions chats/chiens prédites",
+    ["prediction"]
+)
+
+def track_prediction(prediction: str):
+    prediction_counter.labels(prediction=prediction).inc()
+

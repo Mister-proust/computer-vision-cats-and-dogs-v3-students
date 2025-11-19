@@ -18,8 +18,6 @@ from src.database.feedback_service import FeedbackService
 
 from src.monitoring.dashboard_service import DashboardService 
 
-
-
 ENABLE_PROMETHEUS = os.getenv('ENABLE_PROMETHEUS', 'false').lower() == 'true'
 
 
@@ -28,7 +26,6 @@ ENABLE_DISCORD = os.getenv('DISCORD_WEBHOOK_URL') is not None
 alert_high_latency = None
 alert_database_disconnected = None
 notifier = None
-track_prediction = None
 update_db_status = None
 
 if ENABLE_PROMETHEUS:
@@ -36,11 +33,13 @@ if ENABLE_PROMETHEUS:
         from src.monitoring.prometheus_metrics import (
             update_db_status as _update_db_status,
             track_feedback as _track_feedback,   # Gauge database_status
-            request_counter as _request_counter
+            request_counter as _request_counter,
+            track_prediction as _track_prediction
         )
         update_db_status = _update_db_status
         track_feedback = _track_feedback
         request_counter = _request_counter
+        track_prediction = _track_prediction
         print("✅ Prometheus tracking functions loaded")
     except ImportError as e:
         ENABLE_PROMETHEUS = False  # Désactivation silencieuse
@@ -157,8 +156,9 @@ async def predict_api(
         if ENABLE_PROMETHEUS :
             try :
                 request_counter.labels(endpoint="/api/predict", method="POST", status="200").inc()
+                track_prediction("Chat" if result["prediction"] == "Cat" else "Chien")
             except Exception as e:
-                print(f"⚠️  Request counter failed: {e}")
+                print(f" Request counter failed: {e}")
         return response_data
         
     except Exception as e:
