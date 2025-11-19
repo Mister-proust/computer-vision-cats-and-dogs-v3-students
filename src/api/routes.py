@@ -35,7 +35,7 @@ if ENABLE_PROMETHEUS:
     try:
         from src.monitoring.prometheus_metrics import (
             update_db_status as _update_db_status,
-            track_feedback as _track_feedback   # Gauge database_status
+            track_feedback as _track_feedback,   # Gauge database_status
             request_counter as _request_counter
         )
         update_db_status = _update_db_status
