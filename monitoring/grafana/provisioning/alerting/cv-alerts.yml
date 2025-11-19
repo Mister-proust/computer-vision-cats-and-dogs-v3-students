@@ -1,126 +1,116 @@
 apiVersion: 1
-
 groups:
-  - orgId: 1
-    name: cv-monitoring
-    folder: Computer Vision
-    interval: 1m
-    rules:
-      - uid: cv-db-disconnected
-        title: Database Disconnected
-        condition: C
-        data:
-          - refId: A
-            queryType: ''
-            relativeTimeRange:
-              from: 600  
-              to: 0      
-            datasourceUid: prometheus
-            model:
-              editorMode: code
-              expr: cv_database_connected
-              instant: true
-              range: false
-              refId: A
-          - refId: C
-            datasourceUid: __expr__
-            model:
-              conditions:
-                - evaluator:
-                    params:
-                      - 1
-                    type: lt                  
-                  reducer:
-                    type: last                  
-                  type: query
-                  
-              expression: A
-              
-              type: threshold
-              
-        noDataState: Alerting
-        execErrState: Alerting
-        for: 1m
-        
-        annotations:
-          description: L'API ne peut plus accéder à PostgreSQL
-          
-          summary: Base de données PostgreSQL déconnectée
-        
-        labels:
-          severity: critical
-        
-        isPaused: false
-
-# ═══════════════════════════════════════════════════════════════════════════
-# 🎓 STRUCTURE ALERT RULE GRAFANA
-# ═══════════════════════════════════════════════════════════════════════════
-#
-# PIPELINE D'ÉVALUATION (exemple alerte latence)
-# 1. Query A (Prometheus) : récupère métrique histogram
-# 2. Calcul (PromQL) : rate(sum) / rate(count) → latence moyenne
-# 3. Query B (Reduce) : extrait dernière valeur → scalaire
-# 4. Query C (Threshold) : compare scalaire > seuil → booléen
-# 5. For duration : condition vraie pendant N minutes ?
-# 6. Fire : déclenche notification → contact point (Discord)
-#
-# ÉTATS POSSIBLES
-# - Normal : condition false
-# - Pending : condition true mais <for duration (pas encore notifié)
-# - Firing : condition true depuis >for duration (notification envoyée)
-# - Resolved : était firing, maintenant normal (notification résolution)
-#
-# ═══════════════════════════════════════════════════════════════════════════
-# 🛠️ CRÉATION NOUVELLES ALERTES
-# ═══════════════════════════════════════════════════════════════════════════
-#
-# MÉTHODE RECOMMANDÉE (UI Grafana)
-# 1. Dashboard → panel existant → Edit
-# 2. Tab "Alert" → Create alert rule
-# 3. Configurer condition graphiquement
-# 4. Test avec "Preview" (données réelles)
-# 5. Save
-# 6. Exporter : Alerting → Alert rules → Export as YAML
-# 7. Ajouter à cv-alerts.yml
-#
-# ⚠️ CRÉATION MANUELLE YAML (difficile)
-# Format complexe, queries imbriquées, refIds multiples
-# Privilégier UI → export pour éviter erreurs syntaxe
-#
-# ═══════════════════════════════════════════════════════════════════════════
-# 🔧 TESTS ET DEBUG
-# ═══════════════════════════════════════════════════════════════════════════
-#
-# TEST ALERTE (forcer déclenchement)
-# - DB disconnect : docker compose stop postgres
-# - High latency : surcharger CPU (stress test)
-# - No activity : arrêter frontend/stop prédictions
-#
-# MONITORING ALERTES
-# Grafana UI → Alerting → Alert rules
-# - État : Normal, Pending, Firing
-# - Historique : derniers déclenchements
-# - Silences : désactiver temporairement
-#
-# DEBUG QUERY
-# Grafana UI → Explore → datasource Prometheus
-# - Copier expr depuis cv-alerts.yml
-# - Tester query isolément
-# - Vérifier valeurs retournées
-#
-# LOGS GRAFANA
-# docker compose logs grafana | grep -i alert
-# - "provisioning alert rules"
-# - "alert rule ... is firing"
-# - Erreurs d'évaluation
-#
-# ═══════════════════════════════════════════════════════════════════════════
-# 📚 RESSOURCES
-# ═══════════════════════════════════════════════════════════════════════════
-#
-# - Unified Alerting : https://grafana.com/docs/grafana/latest/alerting/
-# - Provisioning : https://grafana.com/docs/grafana/latest/alerting/set-up/provision-alerting-resources/
-# - Query expressions : https://grafana.com/docs/grafana/latest/panels-visualizations/query-transform-data/expression-queries/
-# - PromQL functions : https://prometheus.io/docs/prometheus/latest/querying/functions/
-#
-# ═══════════════════════════════════════════════════════════════════════════
+    - orgId: 1
+      name: cv-monitoring
+      folder: Computer Vision
+      interval: 1m
+      rules:
+        - uid: cv-db-disconnected
+          title: Database Disconnected
+          condition: C
+          data:
+            - refId: A
+              relativeTimeRange:
+                from: 600
+                to: 0
+              datasourceUid: prometheus
+              model:
+                editorMode: code
+                expr: cv_database_connected
+                instant: true
+                intervalMs: 1000
+                maxDataPoints: 43200
+                range: false
+                refId: A
+            - refId: C
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 1
+                        type: lt
+                      reducer:
+                        type: last
+                      type: query
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                type: threshold
+          dashboardUid: ""
+          panelId: 0
+          noDataState: Alerting
+          execErrState: Alerting
+          for: 1m
+          annotations:
+            description: L'API ne peut plus accéder à PostgreSQL
+            summary: Base de données PostgreSQL déconnectée
+          labels:
+            severity: critical
+          isPaused: false
+    - orgId: 1
+      name: feedback_alert
+      folder: Computer Vision
+      interval: 1m
+      rules:
+        - uid: bf4lkiz1v7pj4e
+          title: ' feedback positif trop faible'
+          condition: C
+          data:
+            - refId: A
+              relativeTimeRange:
+                from: 3600
+                to: 0
+              datasourceUid: prometheus
+              model:
+                adhocFilters: []
+                datasource:
+                    type: prometheus
+                    uid: prometheus
+                editorMode: builder
+                expr: cv_user_feedback_total
+                instant: true
+                interval: ""
+                intervalMs: 10000
+                legendFormat: __auto
+                maxDataPoints: 43200
+                range: false
+                refId: A
+            - refId: C
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 50
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+          dashboardUid: cv-cats-dogs-workshop
+          panelId: 3
+          noDataState: NoData
+          execErrState: Error
+          for: 10m
+          keepFiringFor: 10m
+          annotations:
+            __dashboardUid__: cv-cats-dogs-workshop
+            __panelId__: "3"
+            summary: Taux de satisfaction trop faible, revoir le modèle !
+          isPaused: false
+          notification_settings:
+            receiver: Discord CV Alerts
