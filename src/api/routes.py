@@ -66,7 +66,7 @@ TEMPLATES_DIR = ROOT_DIR / "src" / "web" / "templates"
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
 router = APIRouter()
-
+"""
 app = FastAPI()
 
 if ENABLE_PROMETHEUS:
@@ -92,7 +92,7 @@ if ENABLE_PROMETHEUS:
                 print(f"[Prometheus] Erreur compteur requêtes : {e}")
 
         return response
-
+"""
 
 predictor = CatDogPredictor()
 
