@@ -36,11 +36,11 @@ if ENABLE_PROMETHEUS:
         from src.monitoring.prometheus_metrics import (
             update_db_status as _update_db_status,
             track_feedback as _track_feedback,   # Gauge database_status
-        #    request_counter as _request_counter
+            request_counter as _request_counter
         )
         update_db_status = _update_db_status
         track_feedback = _track_feedback
-        # request_counter = _request_counter
+        request_counter = _request_counter
         print("✅ Prometheus tracking functions loaded")
     except ImportError as e:
         ENABLE_PROMETHEUS = False  # Désactivation silencieuse
@@ -154,6 +154,11 @@ async def predict_api(
         }
         inference_time_ms = (time.time() - start_time) * 1000
         track_inference_time(inference_time_ms)
+        if ENABLE_PROMETHEUS :
+            try :
+                request_counter.labels(endpoint="/api/predict", method="POST", status="200").inc()
+            except Exception as e:
+                print(f"⚠️  Request counter failed: {e}")
         return response_data
         
     except Exception as e:
