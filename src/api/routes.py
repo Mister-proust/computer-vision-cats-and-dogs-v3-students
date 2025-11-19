@@ -214,7 +214,7 @@ async def update_feedback(
                     detail="user_feedback doit être 0 ou 1"
                 )
             record.user_feedback = user_feedback
-            
+             
             if ENABLE_PROMETHEUS:
                 try:
                     track_feedback("positive" if user_feedback == 1 else "negative")
