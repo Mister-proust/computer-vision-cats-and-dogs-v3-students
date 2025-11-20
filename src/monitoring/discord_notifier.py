@@ -219,7 +219,7 @@ def alert_model_degradation(accuracy: float, threshold: float = 0.85):
     
     🔗 APPELÉ DEPUIS
     - Endpoint /feedback (calcul accuracy glissante sur derniers N feedbacks)
-    - Script de monitoring périodique (cron job)
+    - Script de monit oring périodique (cron job)
     
     Args:
         accuracy: Accuracy actuelle (ex: 0.78 pour 78%)
