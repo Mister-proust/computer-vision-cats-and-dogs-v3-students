@@ -151,7 +151,7 @@ async def predict_api(
             "inference_time_ms": inference_time_ms,
             "feedback_id": feedback_record.id  # Pour update feedback ultérieur
         }
-        inference_time_ms = (time.time() - start_time) * 1000
+        
         track_inference_time(inference_time_ms)
         if ENABLE_PROMETHEUS :
             try :
