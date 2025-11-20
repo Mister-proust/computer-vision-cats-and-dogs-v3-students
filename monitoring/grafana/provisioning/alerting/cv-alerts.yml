@@ -56,7 +56,7 @@ groups:
                 type: threshold
           dashboardUid: cv-cats-dogs-workshop
           panelId: 6
-          noDataState: NoData
+          noDataState: OK
           execErrState: Error
           for: 30m
           annotations:
@@ -146,7 +146,7 @@ groups:
                 type: threshold
           dashboardUid: cv-cats-dogs-workshop
           panelId: 5
-          noDataState: NoData
+          noDataState: OK
           execErrState: Error
           for: 1h
           keepFiringFor: 1m
@@ -260,7 +260,7 @@ groups:
                 type: threshold
           dashboardUid: cv-cats-dogs-workshop
           panelId: 3
-          noDataState: NoData
+          noDataState: OK
           execErrState: Error
           for: 10m
           keepFiringFor: 10m
